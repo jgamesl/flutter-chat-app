@@ -1,6 +1,9 @@
 import 'package:chat/models/usuario.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import '../services/auth_service.dart';
 
 
 class UsuariosPage extends StatefulWidget {
@@ -17,30 +20,32 @@ class _UsuariosPageState extends State<UsuariosPage> {
   final usuarios = [
     Usuario(
       online: true, 
+      nombre: 'Joel',
       email: 'test@test.com', 
-      nombre: 'María', 
       uuid: '1'
     ),
     Usuario(
       online: true, 
+      nombre: 'Maria',
       email: 'test2@test.com', 
-      nombre: 'Melissa', 
       uuid: '2'
     ),
     Usuario(
       online: false, 
-      email: 'test3@test.com', 
-      nombre: 'Fernando', 
+      nombre: 'Luis',
+      email: 'test3@test.com',
       uuid: '3'
     )
   ];
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final usuario = authService.usuario;
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'Mi Nombre',
+        title: Text(
+          usuario.nombre,
           style: TextStyle(
             color: Colors.black87
           )
@@ -49,7 +54,12 @@ class _UsuariosPageState extends State<UsuariosPage> {
         backgroundColor: Colors.white,
         leading: IconButton(
           icon: Icon( Icons.exit_to_app, color: Colors.black87), 
-          onPressed: () {  },
+          onPressed: () {
+            //TODO: desconectarnos del socket server
+            authService.logout();
+            AuthService.deleteToken();
+            Navigator.pushReplacementNamed(context, 'login');
+          },
         ),
         actions: [
           Container(
@@ -112,11 +122,11 @@ class _usuarioListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      title: Text(usuario.nombre),
+      title: Text(usuario.email),
       subtitle: Text(usuario.email),
       leading: CircleAvatar(
         backgroundColor: Colors.blue[100],
-        child: Text(usuario.nombre.substring(0,2)),
+        child: Text(usuario.email.substring(0,2)),
       ),
       trailing: Container(
         width: 10,

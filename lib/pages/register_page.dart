@@ -3,6 +3,10 @@ import 'package:chat/widgets/custom_input.dart';
 import 'package:chat/widgets/labels.dart';
 import 'package:chat/widgets/logo.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../helpers/mostrar_alerta.dart';
+import '../services/auth_service.dart';
 
 
 class RegisterPage extends StatelessWidget {
@@ -52,7 +56,9 @@ class __FormState extends State<_Form> {
   final passCtrl = TextEditingController();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {    
+    final authService = Provider.of<AuthService>(context, listen: false);
+
     return Container(
       
       margin: EdgeInsets.only(top: 40),
@@ -82,7 +88,23 @@ class __FormState extends State<_Form> {
           // TextField(),
           
           // TODO: crear boton
-          BotonAzul(onPressed: () {}, buttonText: 'Ingresar')
+          BotonAzul(onPressed: authService.autenticando ? null : () async {
+
+                FocusScope.of(context).unfocus();
+                final registerOk = await authService.register(nameCtrl.text.trim(), emailCtrl.text.trim() , passCtrl.text.trim());
+                
+                if (registerOk) {
+                  //TODO:  Navegar otra pantalla conectar a socket server
+                  Navigator.pushReplacementNamed(context, 'usuarios');
+                } else {
+                  // Mostrar alerta
+                  mostrarAlerta(
+                    context, 
+                    'Registro incorrecto', 
+                    'Revise sus credenciales nuevamente'
+                  );
+                }
+            }, buttonText: 'Ingresar')
         ],
       ),
     );
